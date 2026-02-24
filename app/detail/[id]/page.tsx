@@ -41,7 +41,7 @@ export default function VulnerabilityDetail() {
           },
         });
         setData(res.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Fallback for demo if the specific endpoint isn't ready, try to find it from the list
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -51,7 +51,7 @@ export default function VulnerabilityDetail() {
             },
           });
           const listData = Array.isArray(res.data) ? res.data : res.data.content || [];
-          const found = listData.find((item: any) => item.id.toString() === params.id);
+          const found = listData.find((item: { id: number | string }) => item.id.toString() === params.id);
 
           if (found) {
             // Fill in missing fields for demonstration if they don't exist yet
@@ -65,8 +65,12 @@ export default function VulnerabilityDetail() {
           } else {
             setError("Vulnerability not found.");
           }
-        } catch (fallbackErr) {
-          setError(err.response?.data?.message || err.message || "Failed to fetch details");
+        } catch {
+          if (axios.isAxiosError(err)) {
+            setError(err.response?.data?.message || err.message || "Failed to fetch details");
+          } else {
+            setError(err instanceof Error ? err.message : "Failed to fetch details");
+          }
         }
       } finally {
         setLoading(false);
@@ -100,11 +104,18 @@ export default function VulnerabilityDetail() {
 
       // Clear toast after 3 seconds
       setTimeout(() => setToast(null), 3000);
-    } catch (err: any) {
-      setToast({
-        message: err.response?.data?.message || "Failed to approve vulnerability.",
-        type: "error"
-      });
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setToast({
+          message: err.response?.data?.message || "Failed to approve vulnerability.",
+          type: "error"
+        });
+      } else {
+        setToast({
+          message: err instanceof Error ? err.message : "Failed to approve vulnerability.",
+          type: "error"
+        });
+      }
       setTimeout(() => setToast(null), 3000);
     } finally {
       setApproving(false);
