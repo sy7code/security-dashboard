@@ -1,135 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import ReactDiffViewer from "react-diff-viewer-continued";
-import axios from "axios";
-
-interface VulnerabilityDetail {
-  id: number;
-  threatType: string;
-  originalCode: string;
-  fixedCode: string;
-  severity: string;
-  status: string;
-  approvalStatus: string;
-  description: string;
-  repoUrl?: string;
-  jiraKey?: string;
-  prNumber?: number;
-  aiExplanation?: string;
-}
+import { useVulnerabilityDetail } from "../../hooks/useVulnerabilityDetail";
+import { SeverityBadge } from "../../components/Badge";
+import CodeDiffViewer from "../../components/CodeDiffViewer";
+import Toast from "../../components/Toast";
 
 export default function VulnerabilityDetail() {
   const params = useParams();
   const router = useRouter();
-  const [data, setData] = useState<VulnerabilityDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [approving, setApproving] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        // Fetch specific log or just use the summary endpoint if backend logic differs
-        // Assume /api/vulnerabilities/{id} exists for fetching details
-        const res = await axios.get(`${apiUrl}/api/vulnerabilities/${params.id}`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        setData(res.data);
-      } catch (err: unknown) {
-        // Fallback for demo if the specific endpoint isn't ready, try to find it from the list
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-          const res = await axios.get(`${apiUrl}/api/vulnerabilities`, {
-            headers: {
-              "ngrok-skip-browser-warning": "69420",
-            },
-          });
-          const listData = Array.isArray(res.data) ? res.data : res.data.content || [];
-          const found = listData.find((item: { id: number | string }) => item.id.toString() === params.id);
-
-          if (found) {
-            // Fill in missing fields for demonstration if they don't exist yet
-            setData({
-              ...found,
-              originalCode: found.originalCode || "public void process(String input) {\n  System.out.println(input);\n  // VULNERABLE CODE\n}",
-              fixedCode: found.fixedCode || "public void process(String input) {\n  if (input == null) return;\n  // SECURE CODE\n  System.out.println(sanitize(input));\n}",
-              description: found.description || "Found a potential vulnerability requiring attention.",
-              aiExplanation: found.aiExplanation || "Added null check and input sanitization to prevent potential injection.",
-            });
-          } else {
-            setError("Vulnerability not found.");
-          }
-        } catch {
-          if (axios.isAxiosError(err)) {
-            setError(err.response?.data?.message || err.message || "Failed to fetch details");
-          } else {
-            setError(err instanceof Error ? err.message : "Failed to fetch details");
-          }
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (params.id) {
-      fetchDetail();
-    }
-  }, [params.id]);
-
-  const handleApprove = async () => {
-    setApproving(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      await axios.post(
-        `${apiUrl}/api/vulnerabilities/approve/${params.id}`,
-        {},
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        }
-      );
-
-      const jiraMessage = data?.jiraKey ? ` (Jira: ${data.jiraKey})` : "";
-      setToast({ message: `성공적으로 반영되었습니다.${jiraMessage}`, type: "success" });
-
-      // Update local state to reflect approval
-      setData(prev => prev ? { ...prev, approvalStatus: "APPROVED", status: "RESOLVED" } : null);
-
-      // Clear toast after 3 seconds
-      setTimeout(() => setToast(null), 3000);
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setToast({
-          message: err.response?.data?.message || "Failed to approve vulnerability.",
-          type: "error"
-        });
-      } else {
-        setToast({
-          message: err instanceof Error ? err.message : "Failed to approve vulnerability.",
-          type: "error"
-        });
-      }
-      setTimeout(() => setToast(null), 3000);
-    } finally {
-      setApproving(false);
-    }
-  };
-
-  const getSeverityBadgeColor = (severity: string) => {
-    switch (severity?.toUpperCase()) {
-      case "CRITICAL": return "bg-red-500/10 text-red-500 border-red-500/20";
-      case "HIGH": return "bg-orange-500/10 text-orange-500 border-orange-500/20";
-      case "MEDIUM": return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
-      default: return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-    }
-  };
+  const {
+    data,
+    loading,
+    error,
+    approving,
+    isApproved,
+    toast,
+    setToast,
+    handleApprove
+  } = useVulnerabilityDetail(params.id || "");
 
   if (loading) {
     return (
@@ -156,25 +46,17 @@ export default function VulnerabilityDetail() {
     );
   }
 
-  const isApproved = data.approvalStatus === "APPROVED" || data.status === "RESOLVED";
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100 p-8 font-sans">
       <div className="max-w-7xl mx-auto relative pb-24">
 
-        {/* Toast Notification */}
+        {/* Global Toast Component */}
         {toast && (
-          <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 border transition-all animate-in fade-in slide-in-from-top-5 max-w-md ${toast.type === 'success'
-            ? 'bg-green-950/80 border-green-500/30 text-green-200 backdrop-blur-md'
-            : 'bg-red-950/80 border-red-500/30 text-red-200 backdrop-blur-md'
-            }`}>
-            {toast.type === 'success' ? (
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-            ) : (
-              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            )}
-            <p className="font-medium">{toast.message}</p>
-          </div>
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
         )}
 
         {/* Back Button & Header Component */}
@@ -190,9 +72,7 @@ export default function VulnerabilityDetail() {
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold border tracking-wider uppercase ${getSeverityBadgeColor(data.severity)}`}>
-                  {data.severity}
-                </span>
+                <SeverityBadge severity={data.severity} />
                 <span className="text-gray-500 font-mono text-sm">#{data.id}</span>
                 {data.jiraKey && (
                   <span className="px-3 py-1 bg-[#0052CC]/10 text-[#4C9AFF] border border-[#0052CC]/30 rounded-full text-xs font-bold tracking-wider">
@@ -224,63 +104,10 @@ export default function VulnerabilityDetail() {
         </div>
 
         {/* Diff Viewer Component */}
-        <div className="bg-[#111111] rounded-2xl border border-gray-800/60 overflow-hidden shadow-2xl">
-          <div className="border-b border-gray-800/80 bg-[#161616] px-6 py-4 flex justify-between items-center">
-            <h2 className="font-semibold text-gray-300 flex items-center gap-2">
-              <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-              Proposed Changes
-            </h2>
-            <div className="flex gap-4 text-sm font-medium">
-              <span className="text-red-400 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-red-500/50"></span> Original
-              </span>
-              <span className="text-green-400 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-500/50"></span> AI Fixed
-              </span>
-            </div>
-          </div>
-
-          <div className="diff-viewer-container bg-[#0b0b0b]">
-            <ReactDiffViewer
-              oldValue={data.originalCode}
-              newValue={data.fixedCode}
-              splitView={true}
-              useDarkTheme={true}
-              leftTitle="Vulnerable Code"
-              rightTitle="Auto-Healed Code"
-              styles={{
-                variables: {
-                  dark: {
-                    diffViewerBackground: '#0b0b0b',
-                    diffViewerColor: '#d4d4d4',
-                    addedBackground: 'rgba(22, 163, 74, 0.15)',
-                    addedColor: '#4ade80',
-                    removedBackground: 'rgba(220, 38, 38, 0.15)',
-                    removedColor: '#f87171',
-                    wordAddedBackground: 'rgba(22, 163, 74, 0.3)',
-                    wordRemovedBackground: 'rgba(220, 38, 38, 0.3)',
-                    addedGutterBackground: 'rgba(22, 163, 74, 0.1)',
-                    removedGutterBackground: 'rgba(220, 38, 38, 0.1)',
-                    gutterBackground: '#111111',
-                    gutterBackgroundDark: '#111111',
-                    highlightBackground: '#1a1a1a',
-                    highlightGutterBackground: '#1a1a1a',
-                    codeFoldGutterBackground: '#1a1a1a',
-                    codeFoldBackground: '#161616',
-                    emptyLineBackground: '#0b0b0b',
-                    gutterColor: '#6b7280',
-                    addedGutterColor: '#4ade80',
-                    removedGutterColor: '#f87171',
-                  }
-                },
-                contentText: {
-                  fontSize: '14px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                }
-              }}
-            />
-          </div>
-        </div>
+        <CodeDiffViewer
+          originalCode={data.originalCode}
+          fixedCode={data.fixedCode}
+        />
 
         {/* Floating Action Bar */}
         <div className="fixed bottom-0 left-0 w-full bg-[#111111]/90 backdrop-blur-xl border-t border-gray-800/80 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-40">
