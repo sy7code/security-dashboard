@@ -16,6 +16,11 @@ export function useVulnerabilities() {
         setVulnerabilities(data);
         setError(null);
       } catch (err: unknown) {
+        if (err instanceof AxiosError && err.response?.status === 401 || err instanceof AxiosError && err.response?.status === 403) {
+          // Let the apiClient interceptor handle the redirect
+          return;
+        }
+
         // Fallback to mock data if backend is offline so UI can be verified
         if (err instanceof AxiosError && err.message.includes('Network Error')) {
           const mockData: Vulnerability[] = [
