@@ -16,10 +16,12 @@ export const apiClient = axios.create({
 // Configure Request Interceptor (e.g. JWT Token injection)
 apiClient.interceptors.request.use(
   (config) => {
-    // Example: const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {
@@ -32,9 +34,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     // Custom error logging or Global toast dispatching can be done here.
-    if (error.response?.status === 401) {
-      console.warn("Unauthorized access - Redirecting to login...");
-      // e.g. window.location.href = '/login';
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn("Unauthorized/Forbidden access - Redirecting to login...");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
