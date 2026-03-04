@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useVulnerabilityDetail } from "../../hooks/useVulnerabilityDetail";
 import CodeDiffViewer from "../../components/CodeDiffViewer";
 import Toast from "../../components/Toast";
@@ -12,6 +13,15 @@ import { LoadingSpinner, ErrorFeedback } from "../../components/StateFeedback";
 export default function VulnerabilityDetail() {
   const params = useParams();
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+      }
+    }
+  }, [router]);
 
   const {
     data,
