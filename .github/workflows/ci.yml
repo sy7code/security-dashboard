@@ -1,0 +1,33 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Build project (Dry run)
+        run: npm run build
