@@ -23,22 +23,41 @@ export const getStatusColor = (status: string) => {
 };
 
 export function SeverityBadge({ severity }: { severity?: string }) {
+  const getSeverityLabel = (sev: string) => {
+    switch (sev.toUpperCase()) {
+      case "CRITICAL": return "치명적";
+      case "HIGH": return "높음";
+      case "MEDIUM": return "중간";
+      case "LOW": return "낮음";
+      default: return "미분류";
+    }
+  };
+
   return (
     <span className={`px-3 py-1 rounded-full text-[11px] font-bold border tracking-wider uppercase ${getSeverityBadgeColor(severity || 'UNKNOWN')}`}>
-      {severity || 'UNKNOWN'}
+      {getSeverityLabel(severity || 'UNKNOWN')}
     </span>
   );
 }
 
 export function StatusIndicator({ status, approvalStatus }: { status?: string, approvalStatus?: string }) {
   const finalStatus = status || approvalStatus || 'OPEN';
-  const label = finalStatus.toLowerCase().replace('_', ' ');
+
+  const getStatusLabel = (s: string) => {
+    const formatted = s.toUpperCase();
+    if (formatted.includes('RESOLVED') || formatted.includes('DONE')) return "해결됨";
+    if (formatted.includes('APPROVED')) return "승인됨";
+    if (formatted.includes('PROGRESS')) return "조치중";
+    if (formatted.includes('PENDING')) return "대기중";
+    if (formatted.includes('REJECTED')) return "거절됨";
+    return "열림";
+  };
 
   return (
     <div className="flex items-center gap-3">
       <span className={`w-2 h-2 rounded-full shadow-sm ${getStatusColor(finalStatus)}`}></span>
-      <span className="text-gray-400 text-sm font-medium capitalize">
-        {label}
+      <span className="text-gray-400 text-sm font-medium">
+        {getStatusLabel(finalStatus)}
       </span>
     </div>
   );

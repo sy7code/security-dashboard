@@ -29,10 +29,10 @@ export default function DetailHeader({
           )}
         </div>
         <h1 className="text-3xl font-bold text-gray-100 mb-2">
-          {threatType || "Unknown Threat Detection"}
+          {threatType || "알 수 없는 위협 탐지"}
         </h1>
         <p className="text-gray-400">
-          {description || "A security vulnerability was automatically detected in your repository."}
+          {description || "저장소에서 보안 취약점이 자동으로 탐지되었습니다."}
         </p>
       </div>
     </div>

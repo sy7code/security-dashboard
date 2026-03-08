@@ -45,7 +45,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-8 relative overflow-hidden">
         {/* Decorative background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-blue-500/10 blur-[64px] pointer-events-none"></div>
-        
+
         <div className="text-center mb-8 relative">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-5 shadow-inner">
             <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,14 +53,14 @@ export default function LoginPage() {
             </svg>
           </div>
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-100 to-gray-500">
-            Admin Access
+            관리자 접속
           </h2>
           <p className="text-gray-400 mt-2 text-sm">보안 대시보드 접근을 위해 로그인하세요.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5 relative">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5 ml-1">Username</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5 ml-1">사용자 이름</label>
             <input
               type="text"
               value={username}
@@ -71,7 +71,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5 ml-1">Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5 ml-1">비밀번호</label>
             <input
               type="password"
               value={password}

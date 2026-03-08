@@ -13,14 +13,14 @@ export default function CodeDiffViewer({ originalCode, fixedCode }: CodeDiffView
       <div className="border-b border-gray-800/80 bg-[#161616] px-6 py-4 flex justify-between items-center">
         <h2 className="font-semibold text-gray-300 flex items-center gap-2">
           <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-          Proposed Changes
+          변경 제안
         </h2>
         <div className="flex gap-4 text-sm font-medium">
           <span className="text-red-400 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-red-500/50"></span> Original
+            <span className="w-2 h-2 rounded-full bg-red-500/50"></span> 원본 코드
           </span>
           <span className="text-green-400 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500/50"></span> AI Fixed
+            <span className="w-2 h-2 rounded-full bg-green-500/50"></span> AI 수정본
           </span>
         </div>
       </div>
@@ -31,8 +31,8 @@ export default function CodeDiffViewer({ originalCode, fixedCode }: CodeDiffView
           newValue={fixedCode}
           splitView={true}
           useDarkTheme={true}
-          leftTitle="Vulnerable Code"
-          rightTitle="Auto-Healed Code"
+          leftTitle="취약한 코드"
+          rightTitle="자동 수정된 코드"
           styles={{
             variables: {
               dark: {

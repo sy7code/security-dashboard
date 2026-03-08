@@ -53,7 +53,7 @@ export default function DashboardCharts({ vulnerabilities }: DashboardChartsProp
   });
 
   const doughnutData = {
-    labels: ["Critical", "High", "Medium", "Low"],
+    labels: ["치명적", "높음", "중간", "낮음"],
     datasets: [
       {
         data: [
