@@ -10,7 +10,7 @@ export function LoadingSpinner() {
 
 export function ErrorFeedback({
   error,
-  title = "Error Occurred",
+  title = "오류 발생",
   onRetry,
 }: {
   error: string;
@@ -32,14 +32,14 @@ export function ErrorFeedback({
             onClick={() => router.push("/")}
             className="px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors border border-gray-800"
           >
-            Dashboard
+            대시보드
           </button>
           {onRetry && (
             <button
               onClick={onRetry}
               className="px-4 py-2 bg-red-900/50 hover:bg-red-800/50 rounded-lg transition-colors border border-red-800/50"
             >
-              Retry
+              재시도
             </button>
           )}
         </div>

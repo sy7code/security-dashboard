@@ -12,7 +12,7 @@ export default function AiExplanation({ explanation }: AiExplanationProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
         <div>
-          <h3 className="text-sm font-semibold text-blue-300 mb-1">AI Remediation Strategy</h3>
+          <h3 className="text-sm font-semibold text-blue-300 mb-1">AI 해결 전략</h3>
           <p className="text-blue-200/80 text-sm leading-relaxed">{explanation}</p>
         </div>
       </div>

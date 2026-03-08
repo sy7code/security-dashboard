@@ -17,7 +17,8 @@ export default function VulnerabilityDetail() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      if (!token) {
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      if (!token && !isLocal) {
         router.push("/login");
       }
     }
@@ -37,7 +38,7 @@ export default function VulnerabilityDetail() {
   if (loading) return <LoadingSpinner />;
 
   if (error || !data) {
-    return <ErrorFeedback error={error || "Vulnerability not found"} />;
+    return <ErrorFeedback error={error || "취약점을 찾을 수 없습니다"} />;
   }
 
   return (
@@ -59,7 +60,7 @@ export default function VulnerabilityDetail() {
           className="group flex items-center gap-2 text-gray-500 hover:text-gray-300 transition-colors mb-8"
         >
           <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Dashboard
+          대시보드로 돌아가기
         </button>
 
         <div className="bg-[#111111] rounded-2xl border border-gray-800/60 p-8 shadow-2xl mb-8">
