@@ -41,3 +41,8 @@ export async function updateAiEngine(id: number, data: AiEngineConfigInput): Pro
 export async function deleteAiEngine(id: number): Promise<void> {
   await apiClient.delete(`${AI_ENGINES_URL}/${id}`);
 }
+
+export async function testConnection(data: ScannerConfigInput | AiEngineConfigInput): Promise<{ success: boolean; message: string }> {
+  const response = await apiClient.post<{ success: boolean; message: string }>("/api/config/test", data);
+  return response.data;
+}
