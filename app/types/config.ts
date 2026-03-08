@@ -5,6 +5,7 @@ export interface PluginConfig {
   enabled: boolean;
   apiKey: string; // Will come masked from backend
   apiUrl?: string;
+  customParams?: Record<string, string>;
   createdAt: string;
   updatedAt: string;
 }
