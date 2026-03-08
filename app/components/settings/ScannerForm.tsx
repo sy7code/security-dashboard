@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useScanners } from "../../hooks/usePluginConfig";
 import { createScanner, updateScanner, deleteScanner } from "../../api/configApi";
 import { ScannerConfig, ScannerConfigInput } from "../../types/config";
+import { AxiosError } from "axios";
 import { Shield, Plus, Edit2, Trash2, Activity, Clock, CheckCircle2, XCircle, Trash, Info, Send } from "lucide-react";
 import { testConnection } from "../../api/configApi";
 
@@ -110,10 +111,11 @@ export default function ScannerForm() {
     try {
       const result = await testConnection(getCleanPayload());
       setTestResult(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ message: string }>;
       setTestResult({
         success: false,
-        message: err.response?.data?.message || err.message || "연동 테스트 실패"
+        message: axiosError.response?.data?.message || axiosError.message || "연동 테스트 실패"
       });
     } finally {
       setTesting(false);

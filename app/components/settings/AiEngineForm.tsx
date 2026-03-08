@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useAiEngines } from "../../hooks/usePluginConfig";
 import { createAiEngine, updateAiEngine, deleteAiEngine, testConnection } from "../../api/configApi";
 import { AiEngineConfig, AiEngineConfigInput } from "../../types/config";
+import { AxiosError } from "axios";
 import { Sparkles, Plus, Edit2, Trash2, Cpu, Settings2, CheckCircle2, XCircle, Info, Send, Trash } from "lucide-react";
 
 export default function AiEngineForm() {
@@ -112,10 +113,11 @@ export default function AiEngineForm() {
     try {
       const result = await testConnection(getCleanPayload());
       setTestResult(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ message: string }>;
       setTestResult({
         success: false,
-        message: err.response?.data?.message || err.message || "연동 테스트 실패"
+        message: axiosError.response?.data?.message || axiosError.message || "연동 테스트 실패"
       });
     } finally {
       setTesting(false);
