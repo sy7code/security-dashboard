@@ -4,12 +4,21 @@ import { useVulnerabilities } from "./hooks/useVulnerabilities";
 import DashboardStats from "./components/DashboardStats";
 import DashboardCharts from "./components/DashboardCharts";
 import VulnerabilityTable from "./components/VulnerabilityTable";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+export type TabType = 'sast' | 'cspm';
 
 export default function Dashboard() {
   const { vulnerabilities, loading, error } = useVulnerabilities();
+  const [activeTab, setActiveTab] = useState<TabType>('sast');
   const router = useRouter();
+
+  // 필터링 로직
+  const filteredVulnerabilities = vulnerabilities.filter(vuln => {
+    const isSast = !vuln.source || vuln.source.toUpperCase() === 'SNYK';
+    return activeTab === 'sast' ? isSast : !isSast;
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -63,8 +72,45 @@ export default function Dashboard() {
           </div>
         </header>
 
+        {/* Tab Navigation */}
+        <div className="mb-8 flex justify-center">
+          <div className="bg-[#161616] p-1.5 rounded-full border border-gray-800/80 inline-flex shadow-xl backdrop-blur-xl relative">
+            <button
+              onClick={() => setActiveTab('sast')}
+              className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === 'sast'
+                  ? 'text-white shadow-md'
+                  : 'text-gray-500 hover:text-gray-300'
+                }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              코드 취약점 (SAST)
+            </button>
+            <button
+              onClick={() => setActiveTab('cspm')}
+              className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === 'cspm'
+                  ? 'text-white shadow-md'
+                  : 'text-gray-500 hover:text-gray-300'
+                }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              클라우드 인프라 위험 (CSPM)
+            </button>
+            {/* Sliding animation background indicator */}
+            <div
+              className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out pointer-events-none ${activeTab === 'sast'
+                  ? 'bg-blue-600/90 left-1.5 shadow-[0_0_15px_rgba(37,99,235,0.4)]'
+                  : 'bg-purple-600/90 left-[50%] shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                }`}
+            />
+          </div>
+        </div>
+
         {/* 1. Stats Overview */}
-        <DashboardStats vulnerabilities={vulnerabilities} />
+        <DashboardStats vulnerabilities={filteredVulnerabilities} />
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64 gap-4">
@@ -82,10 +128,10 @@ export default function Dashboard() {
         ) : (
           <>
             {/* 2. Charts Section */}
-            {vulnerabilities.length > 0 && <DashboardCharts vulnerabilities={vulnerabilities} />}
+            {filteredVulnerabilities.length > 0 && <DashboardCharts vulnerabilities={filteredVulnerabilities} />}
 
             {/* 3. Vulnerability List */}
-            <VulnerabilityTable vulnerabilities={vulnerabilities} />
+            <VulnerabilityTable vulnerabilities={filteredVulnerabilities} activeTab={activeTab} />
           </>
         )}
       </div>
