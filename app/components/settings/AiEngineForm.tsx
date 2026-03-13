@@ -100,7 +100,7 @@ export default function AiEngineForm() {
       if (p.key.trim()) params[p.key.trim()] = p.value;
     });
 
-    const payload = { ...formData, customParams: params };
+    const payload: any = { ...formData, customParams: params, pluginType: "AI_ENGINE" };
     if (payload.apiKey === "****" || !payload.apiKey) {
       delete payload.apiKey;
     }

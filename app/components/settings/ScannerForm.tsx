@@ -98,7 +98,7 @@ export default function ScannerForm() {
       if (p.key.trim()) params[p.key.trim()] = p.value;
     });
 
-    const payload = { ...formData, customParams: params };
+    const payload: any = { ...formData, customParams: params, pluginType: "SCANNER" };
     if (payload.apiKey === "****" || !payload.apiKey) {
       delete payload.apiKey;
     }
